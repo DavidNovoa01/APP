@@ -1,20 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import RoleSelectionScreen from './src/components/RoleSelectionScreen';
+import LoginScreen from './src/components/LoginScreen';
+import EstudianteInicio from './src/screens/EstudianteInicio';
+import MaestroInicio from './src/screens/MaestroInicio';
+import AdminInicio from './src/screens/AdminInicio';
+import EstudiantesScreen from './src/screens/EstudiantesScreen';
+import DocentesScreen from './src/screens/DocentesScreen';
+import CursosScreen from './src/screens/CursosScreen';
+import AgregarEstudianteScreen from './src/screens/AgregarEstudianteScreens';
 
-export default function App() {
+
+const Stack = createStackNavigator();
+
+const App = () => {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="RoleSelection">
+        <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="EstudianteInicio" component={EstudianteInicio} />
+        <Stack.Screen name="MaestroInicio" component={MaestroInicio} />
+        <Stack.Screen name="AdminInicio" component={AdminInicio} />
+        <Stack.Screen name="EstudiantesScreen" component={EstudiantesScreen} />
+        <Stack.Screen name="DocentesScreen" component={DocentesScreen} />
+        <Stack.Screen name="CursosScreen" component={CursosScreen} />
+        <Stack.Screen name="AgregarEstudianteScreen" component={AgregarEstudianteScreen} />
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default App;
+
+
+
