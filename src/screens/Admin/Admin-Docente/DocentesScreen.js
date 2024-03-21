@@ -7,13 +7,10 @@ const DocentesScreen = ({ navigation }) => {
     // Lógica para navegar a la subsección deseada
     switch (subsection) {
       case 'AgregarDocente':
-        // Navegar a la pantalla para agregar estudiante
+        navigation.navigate('AgregarDocenteScreen');
         break;
       case 'ListaDocente':
-        // Navegar a la pantalla de lista de estudiantes
-        break;
-      case 'BuscarDocente':
-        // Navegar a la pantalla para buscar estudiante
+        navigation.navigate('ListaDocenteScreen');
         break;
       default:
         break;
@@ -23,18 +20,17 @@ const DocentesScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigateToSubsection('AgregarDocente')} style={styles.subsection}>
-        <Icon name="user-plus" size={30} color="#3498db" />
-        <Text>Agregar Docente</Text>
+        <View style={styles.subsectionContent}>
+          <Icon name="user-plus" size={40} color="#3498db" />
+          <Text style={styles.text}>Agregar Docente</Text>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigateToSubsection('ListaDocente')} style={styles.subsection}>
-        <Icon name="list" size={30} color="#3498db" />
-        <Text>Lista de Docentes</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigateToSubsection('BuscarDocente')} style={styles.subsection}>
-        <Icon name="search" size={30} color="#3498db" />
-        <Text>Buscar Docente</Text>
+        <View style={styles.subsectionContent}>
+          <Icon name="list" size={40} color="#3498db" />
+          <Text style={styles.text}>Lista de Docentes</Text>
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -46,12 +42,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
-    alignItems: 'center',
     padding: 20,
   },
   subsection: {
+    width: '45%', // Ajusta el ancho para mostrar dos elementos por fila
+    aspectRatio: 1, // Mantiene el mismo ancho y alto
+    marginVertical: 10,
+  },
+  subsectionContent: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  text: {
+    marginTop: 10,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

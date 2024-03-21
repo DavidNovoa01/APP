@@ -8,7 +8,6 @@ const RoleSelectionScreen = ({ navigation }) => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1500,
-      useNativeDriver: true,
     }).start();
   };
 
@@ -28,7 +27,7 @@ const RoleSelectionScreen = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigateToLogin('Estudiante')} style={styles.optionButton}>
             <Text style={styles.optionText}>Estudiante</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigateToLogin('Maestro')} style={styles.optionButton}>
+          <TouchableOpacity onPress={() => navigateToLogin('Docente')} style={styles.optionButton}>
             <Text style={styles.optionText}>Maestro</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigateToLogin('Administrador')} style={styles.optionButton}>
@@ -43,14 +42,17 @@ const RoleSelectionScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: 'linear-gradient(to bottom, #3498db, #2ecc71)', // Cambia estos colores según tus preferencias
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0)',  // o 'white'
+    width: '100%',
+    justifyContent: 'center',
   },
   container: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -58,11 +60,11 @@ const styles = StyleSheet.create({
   advertisement: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#3498db',
     marginBottom: 20,
   },
   optionButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#3498db',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
