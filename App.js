@@ -58,6 +58,11 @@ import EditarHorarioScreen from './src/screens/Admin/Admin-PlanEstudio/EditarHor
 import EditarCursoScreen from './src/screens/Admin/Admin-PlanEstudio/EditarCursoScreen';
 import EditarMateriaScreen from './src/screens/Admin/Admin-PlanEstudio/EditarMateriaScreen';
 
+import DatosAsignadosDocenteScreen from './src/screens/Docente/DatosAsignadosDocenteScreen';
+import DatosAsignadosEstudianteScreen from './src/screens/Estudiante/DatosAsignadosEstudianteScreen';
+
+import AsignacionEstudianteScreen from './src/screens/Admin/Admin-Estudiante/AsignacionEstudianteScreen';
+
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -123,6 +128,10 @@ const App = () => {
         <Stack.Screen name="EditarHorarioScreen" component={EditarHorarioScreen} />
         <Stack.Screen name="EditarMateriaScreen" component={EditarMateriaScreen} />
 
+        <Stack.Screen name="DatosAsignadosDocenteScreen" component={DatosAsignadosDocenteScreen} />
+
+        <Stack.Screen name="DatosAsignadosEstudianteScreen" component={DatosAsignadosEstudianteScreen} />
+        <Stack.Screen name="AsignacionEstudianteScreen" component={AsignacionEstudianteScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -13,6 +13,7 @@ const DocentesInicio = ({ navigation }) => {
         navigation.navigate('RegistrarNotaScreen');
         break;
       case 'Visualización Plan de Estudio':
+        navigation.navigate('DatosAsignadosDocenteScreen');
         break;
       case 'Visualización de Listado':
         navigation.navigate('VisualizacionNotasScreen');

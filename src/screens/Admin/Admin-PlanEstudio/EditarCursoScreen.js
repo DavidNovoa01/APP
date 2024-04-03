@@ -16,22 +16,26 @@ const EditarCursoScreen = ({ route, navigation }) => {
   const [modalidad, setModalidad] = useState(curso.modalidad);
 
   const guardarCambios = () => {
-    const cursoModificado = {
-      ...curso,
-      codigoCurso,
-      descripcion,
-      departamentoAcademico,
-      nivel,
-      metodosEnsenanza,
-      año: parseInt(año),
-      cupoMaximo: parseInt(cupoMaximo),
-      cupoActual: parseInt(cupoActual),
-      estado,
-      modalidad,
-    };
-
-    onGuardarCambios(cursoModificado);
-    navigation.navigate('ListaCursosScreen');
+    if (typeof onGuardarCambios === 'function') {
+      const cursoModificado = {
+        ...curso,
+        codigoCurso,
+        descripcion,
+        departamentoAcademico,
+        nivel,
+        metodosEnsenanza,
+        año: parseInt(año),
+        cupoMaximo: parseInt(cupoMaximo),
+        cupoActual: parseInt(cupoActual),
+        estado,
+        modalidad,
+      };
+  
+      onGuardarCambios(cursoModificado);
+      navigation.navigate('ListaCursosScreen');
+    } else {
+      console.error('onGuardarCambios no es una función');
+    }
   };
 
   return (

@@ -1,114 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
 import axios from 'axios';
 
 const AsignacionScreen = ({ route }) => {
   const { docenteId } = route.params;
-  const [aulas, setAulas] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [materias, setMaterias] = useState([]);
-  const [horarios, setHorarios] = useState([]);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
+  const [materiaSeleccionada, setMateriaSeleccionada] = useState(null);
 
-  // Funciones para asignar aulas, cursos, materias y horarios
-  const assignAula = async (docenteId, aulaId) => {
-    await axios.put(`https://localhost:7284/api/docente/${docenteId}/aula/${aulaId}`);
-    // Actualizar la UI según sea necesario
-  };
-
-  const assignCurso = async (docenteId,cursoId) => {
-    await axios.put(`https://localhost:7284/api/docente/${docenteId}/cursos`,[cursoId]);
-    // Actualizar la UI según sea necesario
-  };
-
-  const assignMaterias = async (docenteId, materiaIds) => {
-    await axios.put(`https://localhost:7284/api/docente/${docenteId}/materias`,{materiaIds});
-    // Actualizar la UI según sea necesario
-};
-
-
-  const assignHorario = async (docenteId,horarioId) => {
-    await axios.put(`https://localhost:7284/api/docente/${docenteId}/horario/${horarioId}`);
-    // Actualizar la UI según sea necesario
-  };
-
-  // Funciones para obtener las listas de aulas, cursos, materias y horarios
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const aulasResponse = await axios.get('https://localhost:7284/api/aula');
-        setAulas(aulasResponse.data);
-        const cursosResponse = await axios.get('https://localhost:7284/api/cursos');
-        setCursos(cursosResponse.data);
-        const materiasResponse = await axios.get('https://localhost:7284/api/materia');
-        setMaterias(materiasResponse.data);
-        const horariosResponse = await axios.get('https://localhost:7284/api/horario');
-        setHorarios(horariosResponse.data);
+        const cursosRes = await axios.get('https://localhost:7284/api/cursos');
+        const materiasRes = await axios.get('https://localhost:7284/api/materia');
+        setCursos(cursosRes.data);
+        setMaterias(materiasRes.data);
       } catch (error) {
-        console.error('Error al obtener datos', error);
+        Alert.alert('Error', 'No se pudieron cargar los datos: ' + error.message);
       }
     };
     fetchData();
   }, []);
 
-  // Renderizar las opciones de aulas, cursos, materias y horarios
-  const renderItem = (item, assignFunction, itemType) => (
-    <TouchableOpacity
-        style={styles.item}
-        onPress={() => {
-            switch (itemType) {
-                case 'materia':
-                    assignMaterias(docenteId, [item.id]);
-                    break;
-                case 'curso':
-                    assignCurso(docenteId, item.id);
-                    break;
-                case 'horario':
-                    assignHorario(docenteId, item.id);
-                    break;
-                case 'aula':
-                    assignAula(docenteId, item.id);
-                    break;
-                default:
-                    assignFunction(item.id);
-                    break;
-            }
-        }}>
-        <Text>
-            {itemType === 'materia' && item.nombre}
-            {itemType === 'curso' && item.descripcion}
-            {itemType === 'horario' && item.diaSemana}
-            {itemType === 'aula' && item.nombreNumero}
-        </Text>
-    </TouchableOpacity>
-);
+  const selectCurso = (cursoId) => {
+    setCursoSeleccionado(cursoSeleccionado === cursoId ? null : cursoId);
+  };
 
+  const selectMateria = (materiaId) => {
+    setMateriaSeleccionada(materiaSeleccionada === materiaId ? null : materiaId);
+  };
+
+  const assignToDocente = async () => {
+    if (materiaSeleccionada && cursoSeleccionado) {
+      try {
+        // Asegúrate de que el cuerpo de la solicitud coincida con lo que espera tu API.
+        const response = await axios.post('https://localhost:7284/api/asignaciondocente', {
+          docenteId,
+          materiaId: materiaSeleccionada,
+          cursoId: cursoSeleccionado,
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          Alert.alert('Éxito', 'Materia y curso asignados correctamente al docente.');
+          setCursoSeleccionado(null);
+          setMateriaSeleccionada(null);
+        } else {
+          Alert.alert('Error', `Error al asignar: ${response.status} ${response.statusText}`);
+        }
+      } catch (error) {
+        Alert.alert('Error', `Error al asignar: ${error.message}`);
+      }
+    } else {
+      Alert.alert('Error', 'Debe seleccionar una materia y un curso.');
+    }
+  };
+
+  // Asegúrate de que tu keyExtractor extraiga el ID correcto de tu objeto.
+  const keyExtractor = (item) => item.materiaId || item.cursoId;
+
+  // Renderiza cada materia en la lista.
+  const renderMateriaItem = ({ item }) => (
+    <TouchableOpacity
+      style={[
+        styles.item,
+        materiaSeleccionada === item.materiaId && styles.selectedItem,
+      ]}
+      onPress={() => selectMateria(item.materiaId)} // Usa la propiedad correcta para el ID de la materia
+    >
+      <Text>{item.nombre}</Text>
+    </TouchableOpacity>
+  );
+
+  // Renderiza cada curso en la lista.
+  const renderCursoItem = ({ item }) => (
+    <TouchableOpacity
+      style={[
+        styles.item,
+        cursoSeleccionado === item.cursoId && styles.selectedItem,
+      ]}
+      onPress={() => selectCurso(item.cursoId)} // Usa la propiedad correcta para el ID del curso
+    >
+      <Text>{item.codigoCurso}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Asignar Aulas:</Text>
+      {/* Lista de materias */}
+      <Text style={styles.title}>Seleccionar Materia:</Text>
       <FlatList
-        data={aulas}
-        renderItem={({ item }) => renderItem(item, assignAula, 'aula')}
-        keyExtractor={(item) => item?.id?.toString() ?? 'default-key-aula'}
+        data={materias}
+        renderItem={renderMateriaItem}
+        keyExtractor={keyExtractor}
+        extraData={materiaSeleccionada}
       />
-      <Text style={styles.title}>Asignar Cursos:</Text>
+      {/* Lista de cursos */}
+      <Text style={styles.title}>Seleccionar Curso:</Text>
       <FlatList
         data={cursos}
-        renderItem={({ item }) => renderItem(item, assignCurso, 'curso')}
-        keyExtractor={(item) => item?.id?.toString() ?? 'default-key-curso'}
+        renderItem={renderCursoItem}
+        keyExtractor={keyExtractor}
+        extraData={cursoSeleccionado}
       />
-      <Text style={styles.title}>Asignar Materias:</Text>
-    <FlatList
-        data={materias}
-        renderItem={({ item }) => renderItem(item, assignMaterias,'materia')}
-        keyExtractor={(item) => item?.id?.toString() ?? 'default-key-materia'}
-    />
-      <Text style={styles.title}>Asignar Horarios:</Text>
-      <FlatList
-        data={horarios}
-        renderItem={({ item }) => renderItem(item, assignHorario, 'horario')}
-        keyExtractor={(item) => item?.id?.toString() ?? `default-key-horario`}
-      />
+      <TouchableOpacity style={styles.button} onPress={assignToDocente}>
+        <Text style={styles.buttonText}>Asignar a Docente</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -129,6 +126,20 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     borderRadius: 5,
+  },
+  selectedItem: {
+    backgroundColor: '#c0f0c0',
+  },
+  button: {
+    backgroundColor: '#0000ff',
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#ffffff',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
 

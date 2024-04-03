@@ -108,6 +108,9 @@ const ListaEstudianteScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
           <Icon name="edit" size={20} color="white" />
         </TouchableOpacity>
+        <TouchableOpacity style={styles.assignButton} onPress={() => handleAssign(item.candidatoEstudianteId)}>
+          <Text style={styles.buttonText}>Asignar</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -127,6 +130,11 @@ const ListaEstudianteScreen = ({ navigation }) => {
     // Navega a la pantalla 'EditarEstudiante' con los parámetros del estudiante
     navigation.navigate('EditarEstudianteScreen', { estudiante, onGuardarCambios: handleSaveChanges });
   };
+
+  const handleAssign = (candidatoEstudianteId) => {
+    navigation.navigate('AsignacionEstudianteScreen', { candidatoEstudianteId});
+  };
+
   const handleRefresh = () => {
     // Llama a la función para volver a cargar los datos desde la base de datos
     fetchEstudiantes();
@@ -239,6 +247,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 5,
     marginLeft: 10, // Añade un margen a la izquierda
+  },
+  assignButton: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#f39c12',
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 5,
   },
 });
 

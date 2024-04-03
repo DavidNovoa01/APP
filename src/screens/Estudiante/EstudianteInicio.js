@@ -12,7 +12,7 @@ const EstudianteInicio = ({ navigation }) => {
         navigation.navigate('ObservarNotasScreen');
         break;
       case 'Mi Plan de Estudio':
-        navigation.navigate('MiPlanEstudioScreen');
+        navigation.navigate('DatosAsignadosEstudianteScreen');
         break;
       case 'Reclamos':
         navigation.navigate('ReclamosScreen');

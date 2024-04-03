@@ -90,7 +90,7 @@ const RegistrarNotaScreen = ({ navigation }) => {
             {estudiantes.map((estudiante) => (
               <Picker.Item
                 key={estudiante.id}
-                label={estudiante.nombre}
+                label={`${estudiante.nombre} ${estudiante.apellido}`} // Corrección en la interpolación
                 value={estudiante.id}
               />
             ))}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, TouchableOpacity, Text, StyleSheet, TextInput } from 'react-native';
+import { View, FlatList, TouchableOpacity, Text, StyleSheet, TextInput, Alert } from 'react-native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const VisualizacionNotasScreen = ({ navigation }) => {
-  const [notas, setNotas] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [notas, setNotas] = useState([]);
+  const [notasParaPromedio, setNotasParaPromedio] = useState([]);
+  const [promedio, setPromedio] = useState(null);
 
   useEffect(() => {
     fetchNotas();
@@ -19,6 +21,27 @@ const VisualizacionNotasScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error al obtener notas', error);
     }
+  };
+
+  const agregarNotaAlPromedio = (notaId) => {
+    setNotasParaPromedio((notasActuales) => {
+      const index = notasActuales.indexOf(notaId);
+      if (index > -1) {
+        return notasActuales.filter((id) => id !== notaId); // Remueve la nota
+      } else {
+        return [...notasActuales, notaId]; // Agrega la nota
+      }
+    });
+  };
+
+  const calcularPromedio = () => {
+    if (notasParaPromedio.length === 0) {
+      Alert.alert('Error', 'No hay notas para calcular el promedio');
+      return;
+    }
+    const sumaNotas = notasParaPromedio.reduce((acumulado, actual) => acumulado + actual, 0);
+    const promedioNotas = sumaNotas / notasParaPromedio.length;
+    setPromedio(promedioNotas);
   };
 
   const keyExtractor = (item, index) => {
@@ -66,31 +89,45 @@ const VisualizacionNotasScreen = ({ navigation }) => {
     </View>
   );
 
-  const renderNota = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.cardContent}>
-        {renderNotaInfo("Estudiante: ", item.estudiante)}
-        {renderNotaInfo("Curso: ", item.curso)}
-        {renderNotaInfo("Materia: ", item.materia)}
-        {renderNotaInfo("Periodo Académico: ", item.periodoAcademico)}
-        {renderNotaInfo("Tipo de Nota: ", item.tipoNota)}
-        {renderNotaInfo("Valor de Nota: ", item.valorNota.toString())}
-        {renderNotaInfo("Descripción de la Nota: ", item.descripcionNota)}
+  const renderNota = ({ item }) => {
+    const isSelected = notasParaPromedio.includes(item.notaId.toString());
+    
+    return (
+      <View style={[styles.card, isSelected && styles.cardSelected]}>
+        <View style={styles.cardContent}>
+          {renderNotaInfo("Estudiante: ", item.estudiante)}
+          {renderNotaInfo("Curso: ", item.curso)}
+          {renderNotaInfo("Materia: ", item.materia)}
+          {renderNotaInfo("Periodo Académico: ", item.periodoAcademico)}
+          {renderNotaInfo("Tipo de Nota: ", item.tipoNota)}
+          {renderNotaInfo("Valor de Nota: ", item.valorNota.toString())}
+          {renderNotaInfo("Descripción de la Nota: ", item.descripcionNota)}
+        </View>
+        <View style={styles.cardActions}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.deleteButton]} 
+            onPress={() => handleDelete(item.notaId)}>
+            <Icon name="delete" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.editButton]} 
+            onPress={() => handleEdit(item)}>
+            <Icon name="edit" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => agregarNotaAlPromedio(item.notaId.toString())} // Pasar notaId como string
+          >
+            <Icon
+              name="add-circle-outline"
+              size={24}
+              color={isSelected ? "#3498db" : "#7f8c8d"}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.cardActions}>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.deleteButton]} 
-          onPress={() => handleDelete(item.notaId)}>
-          <Icon name="delete" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.editButton]} 
-          onPress={() => handleEdit(item)}>
-          <Icon name="edit" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -100,107 +137,147 @@ const VisualizacionNotasScreen = ({ navigation }) => {
         onChangeText={handleSearch}
         value={searchTerm}
       />
-
       <TouchableOpacity style={styles.button} onPress={handleRefresh}>
         <Icon name="refresh" size={24} color="#fff" />
       </TouchableOpacity>
-
       <FlatList
         data={filteredNotas}
+        extraData={notasParaPromedio}
         keyExtractor={keyExtractor}
         renderItem={renderNota}
       />
+      <TouchableOpacity style={styles.promedioButton} onPress={calcularPromedio}>
+        <Text style={styles.promedioButtonText}>Calcular Promedio</Text>
+      </TouchableOpacity>
+      {promedio !== null && (
+        <View style={styles.resultadoPromedioContainer}>
+          <Text style={styles.resultadoPromedioText}>
+            Promedio de Notas: {promedio.toFixed(2)}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
-
 const styles = StyleSheet.create({
-    infoContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      borderBottomColor: '#ddd',
-      borderBottomWidth: 1,
-      paddingBottom: 8,
-      marginBottom: 8,
-    },
-    label: {
-      fontWeight: '600',
-      color: '#444',
-    },
-    value: {
-      fontWeight: '400',
-      color: '#666',
-      flexShrink: 1,
-    },
-    card: {
-      backgroundColor: '#fff',
-      borderRadius: 10,
-      marginVertical: 8,
-      marginHorizontal: 16,
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.23,
-      shadowRadius: 2.62,
-      elevation: 4,
-    },
-    cardContent: {
-      padding: 16,
-    },
-    cardActions: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      padding: 8,
-    },
-    actionButton: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 10,
-      borderRadius: 5,
-      flexDirection: 'row',
-    },
-    deleteButton: {
-      backgroundColor: '#e74c3c', // Un rojo para eliminar
-      marginRight: 4,
-    },
-    editButton: {
-      backgroundColor: '#2ecc71', // Un verde para editar
-      marginLeft: 4,
-    },
-    actionText: {
-      color: '#fff',
-      marginLeft: 8,
-      fontWeight: '500',
-    },
-    searchInput: {
-      height: 40,
-      borderColor: 'gray',
-      borderWidth: 1,
-      marginBottom: 10,
-      paddingLeft: 10,
-      borderRadius: 5,
-    },
-    button: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      backgroundColor: '#3498db',
-      padding: 10,
-      borderRadius: 5,
-      margin: 16,
-    },
-    searchInput: {
-      height: 40,
-      borderColor: 'gray',
-      borderWidth: 1,
-      marginBottom: 10,
-      paddingLeft: 10,
-      borderRadius: 5,
-    },
-  });
-  
-  export default VisualizacionNotasScreen;
+  container: {
+    flex: 1,
+    marginTop: 10,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingLeft: 10,
+    borderRadius: 5,
+    marginHorizontal: 16,
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: '#3498db',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    marginBottom: 8,
+  },
+  label: {
+    fontWeight: '600',
+    color: '#444',
+  },
+  value: {
+    fontWeight: '400',
+    color: '#666',
+    flexShrink: 1,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginHorizontal: 16, // Ajusta según sea necesario
+    marginVertical: 8, // Aumentado para no pegar la info a los bordes
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+  },
+  cardSelected: {
+    borderColor: '#3498db', // Este es el estilo que se aplica cuando una tarjeta está seleccionada
+    borderWidth: 2, // Solo mantén esta propiedad en lugar de los estilos duplicados
+    backgroundColor: 'rgba(52, 152, 219, 0.2)', // Puedes combinar un borde y un fondo si deseas
+  },
+  // Nuevos estilos para una nota seleccionada
+  cardSelected: {
+    borderWidth: 2,
+    borderColor: '#3498db',
+  },
+  cardActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 8,
+  },
+  actionButton: {
+    padding: 10,
+    borderRadius: 5,
+  },
+  deleteButton: {
+    backgroundColor: '#e74c3c',
+  },
+  editButton: {
+    backgroundColor: '#2ecc71',
+  },
+  addButton: {
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#2ecc71',
+  },
+  promedioButton: {
+    backgroundColor: '#2980b9', // Color más oscuro para más prominencia
+    padding: 12,
+    borderRadius: 5,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  promedioButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  resultadoPromedioContainer: {
+    backgroundColor: '#82E0AA',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  resultadoPromedioText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#27AE60',
+  },
+  addIcon: {
+    color: '#7f8c8d', // Color más suave para menos énfasis
+  },
+  addButton: {
+    padding: 6,
+    borderRadius: 5,
+    backgroundColor: '#ecf0f1', // Color más suave para menos énfasis
+  },
+  addButtonSelected: {
+    backgroundColor: '#bdc3c7', // Por ejemplo, un gris claro para indicar selección
+  },
+});
+export default VisualizacionNotasScreen;
